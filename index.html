@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5f3ee">
+<title>小众星球 PLANET</title>
+<style>
+:root{
+  color-scheme:light;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Noto Sans CJK SC",sans-serif;
+  --paper:#f5f3ee;--ink:#171714;--muted:#8a8982;--line:rgba(23,23,20,.08);
+  --accent:#8d1f30;--white:#fff;--nav:rgba(247,246,242,.9);
+  --chip-bg:#eae7df;--card-bg:#f8f7f3;--input-bg:#fff;--overlay-bg:rgba(245,243,238,.97);
+  --detail-overlay:rgba(15,14,12,.52);--sheet-bg:#f8f7f3;--html-bg:#dedbd4;
+  --bubble-ai:#eae7df;--bubble-me:var(--ink);
+}
+[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#0d0d0f;--ink:#f2f2f4;--muted:#6e6e76;--line:rgba(255,255,255,.08);
+  --accent:#c44a5a;--nav:rgba(22,22,24,.92);
+  --chip-bg:#1a1a1c;--card-bg:#161618;--input-bg:#1a1a1c;--overlay-bg:rgba(13,13,15,.97);
+  --detail-overlay:rgba(0,0,0,.6);--sheet-bg:#161618;--html-bg:#060608;
+  --bubble-ai:#1a1a1c;--bubble-me:#2a2a2e;
+}
+*{box-sizing:border-box}html{background:var(--html-bg)}body{margin:0;color:var(--ink);background:var(--html-bg);transition:background .3s}
+button,input,textarea{font:inherit}button{color:inherit}
+svg{display:block}
+.device{width:min(100%,430px);min-height:100dvh;margin:0 auto;background:var(--paper);position:relative;overflow:hidden;box-shadow:0 0 60px rgba(34,31,24,.14)}
+.app{min-height:100dvh;padding-bottom:94px}
+.topbar{position:sticky;top:0;z-index:20;padding:calc(env(safe-area-inset-top) + 16px) 18px 12px;background:linear-gradient(var(--paper) 75%,rgba(245,243,238,0));backdrop-filter:blur(16px)}
+[data-theme="dark"] .topbar{background:linear-gradient(var(--paper) 75%,rgba(13,13,15,0))}
+.brand-row{height:42px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-family:"PingFang SC",-apple-system,BlinkMacSystemFont,sans-serif;font-size:20px;letter-spacing:.06em;font-weight:600}.brand small{display:block;font:600 9px/1.2 "PingFang SC",-apple-system,sans-serif;letter-spacing:.32em;color:var(--muted);margin-left:1px;margin-top:1px}
+.actions{display:flex;gap:8px}.icon-btn{width:40px;height:40px;border:1px solid var(--line);background:var(--input-bg);border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:.2s}.icon-btn:active{transform:scale(.92)}
+
+/* categories - toggleable */
+.categories{display:flex;gap:9px;overflow:auto;padding:0 18px;max-height:0;opacity:0;transition:max-height .3s,opacity .25s,padding .3s;scrollbar-width:none}.categories::-webkit-scrollbar{display:none}
+.categories.open{max-height:50px;opacity:1;padding:16px 18px 10px}
+.chip{border:0;background:var(--chip-bg);color:var(--ink);border-radius:99px;padding:9px 16px;white-space:nowrap;font-size:12px;letter-spacing:.04em;cursor:pointer;transition:.2s}.chip.active{background:var(--ink);color:var(--paper);box-shadow:0 5px 14px rgba(23,23,20,.18)}
+
+.hero{margin:4px 18px 18px;border-radius:24px;background:#1a1a17;color:#fff;min-height:160px;padding:24px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,20,17,.95) 0 45%,rgba(20,20,17,.15) 78%)}
+.hero>*{position:relative;z-index:1}.hero-kicker{font-size:9px;letter-spacing:.2em;color:#c5b7aa;margin-bottom:7px;font-family:"Microsoft YaHei","微软雅黑",sans-serif}.hero h1{margin:0;font:500 18px/1.4 "Microsoft YaHei","微软雅黑",sans-serif;letter-spacing:.05em}.hero p{margin:6px 0 0;font-size:10px;letter-spacing:.04em;color:rgba(255,255,255,.65);font-family:"Microsoft YaHei","微软雅黑",sans-serif}
+.hero-img:after{background:linear-gradient(90deg,rgba(20,20,17,.78) 0 50%,rgba(20,20,17,.15) 85%)!important}
+.section-head{display:flex;align-items:end;justify-content:space-between;padding:0 18px 13px}.section-head h2{font:500 17px/1 "Microsoft YaHei","微软雅黑",sans-serif;margin:0}.section-head span{font-size:10px;letter-spacing:.14em;color:var(--muted)}
+
+.masonry{display:flex;gap:10px;padding:0 14px}.masonry-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:15px}.card{background:transparent;cursor:pointer;animation:rise .42s both}.card:nth-child(2n){animation-delay:.06s}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.cover{position:relative;border-radius:18px;overflow:hidden;background:var(--chip-bg);box-shadow:0 6px 20px rgba(40,35,25,.06)}.cover img{display:block;width:100%;height:auto;min-height:190px;object-fit:cover;transition:transform .5s}.card:active .cover img{transform:scale(1.03)}
+.ratio-tall img{aspect-ratio:3/4}.ratio-long img{aspect-ratio:9/14}.ratio-short img{aspect-ratio:4/5}
+.save{position:absolute;right:10px;bottom:10px;width:31px;height:31px;border:0;border-radius:50%;background:rgba(20,20,17,.44);backdrop-filter:blur(8px);display:grid;place-items:center;color:#fff;cursor:pointer;transition:.2s}.save.saved{background:var(--accent)}
+.save svg{fill:none;stroke:currentColor;transition:.2s}.save.saved svg{fill:currentColor;stroke:currentColor}
+.meta{padding:9px 3px 0}.title{font-size:13px;line-height:1.4;font-weight:560}.sub{display:flex;justify-content:space-between;align-items:center;margin-top:6px;color:var(--muted);font-size:10px}
+
+/* ── Feed view ── */
+.feed-tabs{display:flex;gap:0;padding:0 18px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.feed-tab{border:0;background:none;padding:12px 14px;font-size:14px;color:var(--muted);cursor:pointer;position:relative;white-space:nowrap;transition:.2s}
+.feed-tab.active{color:var(--ink);font-weight:600}
+.feed-tab.active:after{content:"";position:absolute;bottom:-1px;left:14px;right:14px;height:2px;background:var(--ink);border-radius:2px}
+.feed-card{margin:0 18px 16px;border-radius:18px;overflow:hidden;background:var(--card-bg);box-shadow:0 4px 16px rgba(40,35,25,.04);cursor:pointer;transition:.2s;animation:rise .35s both}
+.feed-card:active{transform:scale(.98)}
+.feed-card img{width:100%;height:180px;object-fit:cover;display:block}
+.feed-body{padding:14px 16px}
+.feed-card h3{margin:0 0 6px;font-size:15px;font-weight:600;line-height:1.4}
+.feed-card p{margin:0;font-size:12px;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.feed-meta{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:10px;color:var(--muted)}
+.feed-tag{background:var(--chip-bg);border-radius:6px;padding:2px 7px;font-size:10px}
+
+/* ── Chat view ── */
+.chat-view{display:flex;flex-direction:column;height:calc(100dvh - 94px - env(safe-area-inset-top) - 70px)}
+.chat-header{text-align:center;padding:8px 0 14px;border-bottom:1px solid var(--line);margin-bottom:0;position:relative}
+.chat-header h3{margin:0;font:600 16px "PingFang SC",sans-serif}
+.chat-header p{margin:3px 0 0;font-size:10px;color:var(--muted)}
+.chat-settings{position:absolute;right:0;top:6px;width:32px;height:32px;border:1px solid var(--line);background:var(--input-bg);border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--muted);transition:.2s}.chat-settings:active{transform:scale(.9)}
+.chat-status{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.chat-status .dot{width:6px;height:6px;border-radius:50%;background:var(--muted)}.chat-status.online .dot{background:#4caf50}
+.api-link{color:var(--accent);cursor:pointer}
+.chat-messages{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;scrollbar-width:none}.chat-messages::-webkit-scrollbar{display:none}
+.chat-bubble{max-width:78%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.6;word-break:break-word;animation:rise .3s both}
+.chat-bubble.ai{align-self:flex-start;background:var(--bubble-ai);color:var(--ink);border-bottom-left-radius:5px}
+.chat-bubble.me{align-self:flex-end;background:var(--bubble-me);color:var(--paper);border-bottom-right-radius:5px}
+.chat-bubble.ai pre{margin:8px 0 0;padding:10px;background:rgba(0,0,0,.08);border-radius:10px;font-size:12px;white-space:pre-wrap;overflow-x:auto}
+[data-theme="dark"] .chat-bubble.ai pre{background:rgba(255,255,255,.06)}
+.typing{display:flex;gap:4px;padding:14px 16px}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{opacity:.3}30%{opacity:1}}
+.chat-suggestions{display:flex;flex-wrap:wrap;gap:8px;padding:0 18px 14px}
+.chat-suggestion{background:var(--chip-bg);color:var(--ink);border:0;border-radius:99px;padding:8px 14px;font-size:12px;cursor:pointer;transition:.2s}.chat-suggestion:active{transform:scale(.95)}
+.chat-input-row{display:flex;gap:8px;padding:12px 18px calc(env(safe-area-inset-bottom) + 12px);border-top:1px solid var(--line);background:var(--paper)}
+.chat-input-row textarea{flex:1;border:1px solid var(--line);border-radius:16px;padding:12px 14px;font-size:14px;resize:none;outline:none;background:var(--input-bg);color:var(--ink);max-height:100px;min-height:44px;transition:border .15s}
+.chat-input-row textarea:focus{border-color:var(--ink)}
+.chat-send{width:44px;height:44px;border:0;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;cursor:pointer;flex-shrink:0;transition:.2s}.chat-send:active{transform:scale(.9)}
+
+/* ── Bottom nav ── */
+.bottom-nav{position:fixed;z-index:30;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,430px);height:calc(74px + env(safe-area-inset-bottom));padding:9px 20px env(safe-area-inset-bottom);display:flex;align-items:center;justify-content:space-between;background:var(--nav);border-top:1px solid var(--line);backdrop-filter:blur(22px)}
+.nav-item{position:relative;width:52px;border:0;background:none;color:#99978f;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9px;cursor:pointer;transition:.2s}.nav-item.active{color:var(--ink)}
+.nav-main{width:48px;height:48px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);display:grid;place-items:center;margin-top:-21px;box-shadow:0 9px 24px rgba(23,23,20,.22);cursor:pointer;transition:.2s}.nav-main:active{transform:scale(.92)}
+
+/* ── Search ── */
+.search-panel{position:fixed;z-index:50;left:50%;top:0;transform:translate(-50%,-110%);width:min(100%,430px);height:100dvh;background:var(--overlay-bg);backdrop-filter:blur(24px);padding:calc(env(safe-area-inset-top) + 19px) 18px 30px;transition:transform .36s cubic-bezier(.22,.8,.2,1);overflow-y:auto}.search-panel.open{transform:translate(-50%,0)}
+.search-line{display:flex;gap:10px}.search-box{height:48px;flex:1;border-radius:16px;border:1px solid var(--line);background:var(--input-bg);display:flex;align-items:center;padding:0 14px;gap:9px}.search-box input{border:0;outline:0;background:transparent;width:100%;font-size:14px;color:var(--ink)}.search-box input::placeholder{color:var(--muted)}.search-go{border:0;border-radius:14px;background:var(--ink);color:var(--paper);height:48px;padding:0 20px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:.2s}.search-go:active{transform:scale(.95)}.close{border:0;background:none;font-size:13px;color:var(--ink)}
+.search-results{padding:24px 0}.search-results h3{font:500 19px "Microsoft YaHei","微软雅黑",sans-serif;margin:0 0 16px}.search-empty{color:var(--muted);font-size:13px;padding:40px 0;text-align:center}
+
+/* ── Detail ── */
+.detail{position:fixed;z-index:60;inset:0;background:var(--detail-overlay);opacity:0;pointer-events:none;transition:.25s;display:flex;justify-content:center;align-items:flex-end}.detail.open{opacity:1;pointer-events:auto}
+.sheet{width:min(100%,430px);height:91dvh;background:var(--sheet-bg);border-radius:30px 30px 0 0;overflow:hidden;transform:translateY(30px);transition:.3s;position:relative}.detail.open .sheet{transform:none}
+.sheet-cover{height:60%;background:var(--chip-bg);position:relative;overflow:hidden}.sheet-cover img{width:100%;height:100%;object-fit:cover}
+.sheet-watermark{position:absolute;inset:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='130'%3E%3Ctext x='18' y='65' fill='rgba(255,255,255,0.16)' font-size='14' font-weight='700' letter-spacing='2' transform='rotate(-28 18 65)' font-family='sans-serif'%3EPlanet%3C/text%3E%3Ctext x='100' y='65' fill='rgba(255,255,255,0.16)' font-size='14' font-weight='700' letter-spacing='2' transform='rotate(-28 100 65)' font-family='sans-serif'%3EWallpaper%3C/text%3E%3Ctext x='18' y='110' fill='rgba(255,255,255,0.16)' font-size='14' font-weight='700' letter-spacing='2' transform='rotate(-28 18 110)' font-family='sans-serif'%3EPlanet%3C/text%3E%3Ctext x='100' y='110' fill='rgba(255,255,255,0.16)' font-size='14' font-weight='700' letter-spacing='2' transform='rotate(-28 100 110)' font-family='sans-serif'%3EWallpaper%3C/text%3E%3C/svg%3E");background-repeat:repeat}
+.sheet-close{position:absolute;top:17px;left:17px;z-index:5}.sheet-heart{position:absolute;top:17px;right:17px;z-index:5}
+.sheet-body{padding:22px 20px 30px}.sheet-title{font:500 23px Georgia,"PingFang SC",serif;margin:0}
+.sheet-row{display:flex;align-items:center;justify-content:space-between;margin-top:13px}
+.download{border:0;border-radius:15px;background:var(--ink);color:var(--paper);height:48px;padding:0 22px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:.2s}.download:active{transform:scale(.96)}
+.download.preview-btn{background:var(--chip-bg);color:var(--ink)}
+.tone{color:var(--muted);font-size:11px;line-height:1.7}
+.sheet-lock{font-size:10px;color:var(--muted);margin-top:8px;letter-spacing:.02em}
+.toast{position:fixed;z-index:80;left:50%;bottom:100px;transform:translate(-50%,15px);background:rgba(23,23,20,.9);color:#fff;border-radius:99px;padding:10px 17px;font-size:11px;opacity:0;transition:.25s;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ── Login ── */
+.login-overlay{position:fixed;z-index:70;inset:0;background:var(--detail-overlay);opacity:0;pointer-events:none;transition:.25s;display:flex;justify-content:center;align-items:center;padding:24px}.login-overlay.open{opacity:1;pointer-events:auto}
+.login-card{width:100%;max-width:360px;background:var(--sheet-bg);border-radius:24px;padding:36px 28px 28px;position:relative;transform:translateY(20px);transition:.3s}.login-overlay.open .login-card{transform:none}
+.login-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border:1px solid var(--line);background:var(--input-bg);border-radius:50%;display:grid;place-items:center;cursor:pointer;font-size:16px;color:var(--muted)}
+.login-logo{font:600 20px "PingFang SC",-apple-system,sans-serif;letter-spacing:.06em;margin-bottom:2px}
+.login-logo small{display:block;font:600 9px/1.2 "PingFang SC",-apple-system,sans-serif;letter-spacing:.32em;color:var(--muted);margin-top:2px}
+.login-sub{font-size:12px;color:var(--muted);margin-bottom:26px}
+.login-tabs{display:flex;border-bottom:1px solid var(--line);margin-bottom:24px}
+.login-tab{flex:1;text-align:center;padding:10px 0;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:.2s}
+.login-tab.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+.login-field{margin-bottom:16px}
+.login-field label{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px;letter-spacing:.02em}
+.login-field input{width:100%;padding:13px 15px;border:1px solid var(--line);border-radius:13px;font-size:15px;outline:none;background:var(--input-bg);color:var(--ink);transition:border .15s}
+.login-field input:focus{border-color:var(--ink)}
+.login-submit{width:100%;padding:14px;background:var(--ink);color:var(--paper);border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;transition:.2s}.login-submit:active{opacity:.85}
+.login-switch{text-align:center;margin-top:20px;font-size:13px;color:var(--muted)}.login-switch a{color:var(--ink);font-weight:500;cursor:pointer}
+.empty{display:flex;flex-direction:column;align-items:center;padding:80px 0;color:var(--muted)}.empty svg{width:44px;height:44px;margin-bottom:14px;opacity:.4}.empty p{font-size:13px}
+@media(min-width:700px){body{padding:22px 0}.device{min-height:calc(100dvh - 44px);border-radius:38px}.app{min-height:calc(100dvh - 44px)}.bottom-nav{bottom:22px;border-radius:0 0 38px 38px}.search-panel{top:22px;height:calc(100dvh - 44px);border-radius:38px}.sheet{height:min(91dvh,840px);border-radius:30px}}
+</style>
+</head>
+<body>
+<div class="device">
+  <main class="app">
+    <header class="topbar">
+      <div class="brand-row">
+        <div class="brand">小众星球<small>PLANET</small></div>
+        <div class="actions">
+          <button class="icon-btn" id="searchBtn" aria-label="搜索"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg></button>
+          <button class="icon-btn" id="themeBtn" aria-label="切换主题"><svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+          <button class="icon-btn" onclick="openLogin()" id="userBtn" aria-label="账户"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg></button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 图库 view -->
+    <div id="view-gallery">
+      <div class="categories" id="categories"></div>
+      <section class="hero" id="hero"><div class="hero-kicker" id="heroKicker">EDITOR'S SELECTION · 06</div><h1 id="heroTitle">暮色收藏集</h1><p id="heroDesc">为夏日屏幕留一寸安静的光</p></section>
+      <div class="section-head"><h2 id="sectionTitle">今日灵感</h2><span id="sectionCount">DAILY PICKS</span></div>
+      <section class="masonry" id="gallery"></section>
+    </div>
+
+    <!-- 刷一刷 view -->
+    <div id="view-feed" style="display:none">
+      <div class="feed-tabs" id="feedTabs">
+        <button class="feed-tab active" data-feed="综合">综合</button>
+        <button class="feed-tab" data-feed="最新">最新</button>
+        <button class="feed-tab" data-feed="知识">知识</button>
+        <button class="feed-tab" data-feed="创意">创意</button>
+        <button class="feed-tab" data-feed="新闻">新闻</button>
+      </div>
+      <div id="feedList" style="padding:14px 0 20px"></div>
+    </div>
+
+    <!-- 问一问 view -->
+    <div id="view-chat" style="display:none">
+      <div class="chat-view">
+        <div class="chat-header">
+          <h3>问一问 · AI 助手</h3>
+          <p><span class="chat-status" id="chatStatus"><span class="dot"></span><span id="chatStatusText">未连接</span></span></p>
+          <button class="chat-settings" id="chatSettingsBtn" aria-label="AI设置"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-suggestions" id="chatSuggestions">
+          <button class="chat-suggestion" onclick="sendQuick("推荐几款极简壁纸")">推荐几款极简壁纸</button>
+          <button class="chat-suggestion" onclick="sendQuick("怎么设置手机壁纸？")">怎么设置手机壁纸？</button>
+          <button class="chat-suggestion" onclick="sendQuick("给我讲个笑话")">给我讲个笑话</button>
+          <button class="chat-suggestion" onclick="sendQuick("今天的天气怎么样")">今天的天气怎么样</button>
+        </div>
+        <div class="chat-input-row">
+          <textarea id="chatInput" placeholder="输入消息..." rows="1"></textarea>
+          <button class="chat-send" id="chatSend"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-item active" data-page="gallery" id="navGallery"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>图库</span></button>
+  <button class="nav-item" data-page="feed" id="navFeed"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg><span>刷一刷</span></button>
+  <button class="nav-main" data-page="chat" id="navChat" aria-label="问一问"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>
+  <button class="nav-item" onclick="window.location.href='admin.html'"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span>后台</span></button>
+  <button class="nav-item" onclick="openLogin()" id="meNav"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg><span>我的</span></button>
+</nav>
+
+<section class="search-panel" id="searchPanel">
+  <div class="search-line"><label class="search-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="searchInput" placeholder="搜索你喜欢的壁纸"></label><button class="search-go" id="searchGo">搜索</button><button class="close" id="searchClose">取消</button></div>
+  <div class="search-results" id="searchResults"></div>
+</section>
+
+<div class="detail" id="detail">
+  <article class="sheet">
+    <button class="icon-btn sheet-close" id="detailClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m15 18-6-6 6-6"/></svg></button>
+    <button class="icon-btn sheet-heart" id="sheetHeart"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg></button>
+    <div class="sheet-cover"><img id="detailImg" alt="壁纸预览"><div class="sheet-watermark"></div></div>
+    <div class="sheet-body">
+      <h3 class="sheet-title" id="detailTitle"></h3>
+      <div class="sheet-row">
+        <div class="tone" id="detailTone"></div>
+        <button class="download" id="downloadBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>下载无水印原图</button>
+      </div>
+      <div class="sheet-lock" id="sheetLock"></div>
+      <button class="download preview-btn" id="previewSaveBtn" style="width:100%;margin-top:12px;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>保存带水印预览图</button>
+    </div>
+  </article>
+</div>
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <button class="login-close" onclick="closeLogin()">&times;</button>
+    <div class="login-logo">小众星球<small>PLANET</small></div>
+    <div class="login-sub" id="loginSub">登录后下载无水印原图、收藏壁纸</div>
+    <div class="login-tabs">
+      <div class="login-tab active" onclick="switchLoginMode('login',this)">登录</div>
+      <div class="login-tab" onclick="switchLoginMode('register',this)">注册</div>
+    </div>
+    <div id="loginFields">
+      <div class="login-field"><label>手机号 / 邮箱</label><input type="text" id="loginAccount" placeholder="请输入手机号或邮箱"></div>
+      <div class="login-field"><label>密码</label><input type="password" id="loginPassword" placeholder="请输入密码"></div>
+      <button class="login-submit" onclick="doLogin()">登录</button>
+    </div>
+    <div id="registerFields" style="display:none">
+      <div class="login-field"><label>昵称</label><input type="text" id="regName" placeholder="给自己起个名字"></div>
+      <div class="login-field"><label>手机号 / 邮箱</label><input type="text" id="regAccount" placeholder="请输入手机号或邮箱"></div>
+      <div class="login-field"><label>设置密码</label><input type="password" id="regPassword" placeholder="至少6位"></div>
+      <button class="login-submit" onclick="doRegister()">注册</button>
+    </div>
+    <div class="login-switch" id="loginSwitch">还没有账号？<a onclick="switchLoginMode('register',document.querySelectorAll('.login-tab')[1])">立即注册</a></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GALLERY_CATS=['全部','自然','极简','插画','渐变','Land专区','收藏'];
+const DEMO_DATA=[
+  {id:1,title:'晨雾山峦',cat:'自然',date:'2026-06-19',likes:1243,ratio:'ratio-long',img:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=700&q=85'},
+  {id:2,title:'极简几何',cat:'极简',date:'2026-06-18',likes:876,ratio:'ratio-short',img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=700&q=85'},
+  {id:3,title:'水墨意境',cat:'插画',date:'2026-06-17',likes:654,ratio:'ratio-tall',img:'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=700&q=85'},
+  {id:4,title:'珊瑚渐变',cat:'渐变',date:'2026-06-16',likes:723,ratio:'ratio-short',img:'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&w=700&q=85'},
+  {id:5,title:'雨后森林',cat:'自然',date:'2026-06-16',likes:455,ratio:'ratio-long',img:'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=700&q=85'},
+  {id:6,title:'白色空间',cat:'极简',date:'2026-06-15',likes:334,ratio:'ratio-short',img:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=700&q=85'},
+  {id:7,title:'日落山脉',cat:'Land专区',date:'2026-06-15',likes:2103,ratio:'ratio-tall',img:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=700&q=85'},
+  {id:8,title:'梦境花园',cat:'插画',date:'2026-06-14',likes:892,ratio:'ratio-tall',img:'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=700&q=85'},
+  {id:9,title:'极光夜空',cat:'Land专区',date:'2026-06-14',likes:1567,ratio:'ratio-tall',img:'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=700&q=85'},
+  {id:10,title:'蓝紫渐变',cat:'渐变',date:'2026-06-13',likes:445,ratio:'ratio-short',img:'https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=700&q=85'},
+];
+
+const FEED_DATA={
+  '综合':[
+    {title:'10款治愈系壁纸，让手机屏幕也有温度',summary:'精选本月最受欢迎的治愈系壁纸合集，从自然风景到极简色块，每一张都能让心情变得平静。',tag:'推荐',source:'小众星球',img:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=600&q=80'},
+    {title:'渐变配色终极指南：从入门到精通',summary:'一篇搞懂渐变配色的底层逻辑，附实操案例和配色工具推荐，设计师必收藏。',tag:'设计',source:'色彩研究所',img:'https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=600&q=80'},
+    {title:'2026年壁纸趋势：少即是多',summary:'极简主义回归，留白成为新主角。来看看今年最值得关注的壁纸设计趋势。',tag:'趋势',source:'设计周刊',img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=80'},
+  ],
+  '最新':[
+    {title:'本周新壁纸：晨雾系列上线',summary:'清晨的雾气弥漫在山间，这组自然摄影壁纸将宁静的晨景定格在屏幕上。',tag:'新品',source:'小众星球',img:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80'},
+    {title:'Land专区新增5张竖版风景',summary:'专为全面屏手机优化的竖版风景壁纸，涵盖日落、极光、星空等主题。',tag:'更新',source:'小众星球',img:'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=600&q=80'},
+    {title:'插画师专访：水墨意境的背后',summary:'专访本期水墨壁纸创作者，聊聊东方美学在现代设计中的应用。',tag:'专访',source:'创意志',img:'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=600&q=80'},
+  ],
+  '知识':[
+    {title:'壁纸分辨率完全攻略：你的手机需要多大的图？',summary:'详解各主流手机屏幕分辨率与壁纸尺寸的对应关系，告别模糊拉伸。',tag:'教程',source:'数码课堂',img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=80'},
+    {title:'色彩心理学：壁纸颜色如何影响你的心情',summary:'蓝色让你平静、暖色让你愉悦——了解色彩背后的心理学原理，选对壁纸。',tag:'科普',source:'心理研究所',img:'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&w=600&q=80'},
+    {title:'OLED屏幕省电指南：深色壁纸的秘密',summary:'为什么OLED屏幕用黑色壁纸更省电？原理是什么？一文讲透。',tag:'科技',source:'极客实验室',img:'https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=600&q=80'},
+  ],
+  '创意':[
+    {title:'用AI生成专属壁纸：5个提示词模板',summary:'分享5个实测好用的AI绘画提示词模板，帮你生成独一无二的手机壁纸。',tag:'AI',source:'创意工坊',img:'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=600&q=80'},
+    {title:'几何图案设计：从零开始画壁纸',summary:'不需要设计基础，用简单的几何图形和配色，也能做出高级感壁纸。',tag:'设计',source:'设计师日记',img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=80'},
+    {title:'把旅行照片变成壁纸：修图技巧分享',summary:'旅行中拍的照片怎么处理才适合做壁纸？分享裁剪、调色、加滤镜的完整流程。',tag:'摄影',source:'影像笔记',img:'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80'},
+  ],
+  '新闻':[
+    {title:'小众星球v2.0更新：新增暗黑模式与AI助手',summary:'本次更新带来暗黑模式、智能搜索、问一问AI助手等多项功能升级，体验全面进化。',tag:'更新',source:'小众星球',img:'https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=600&q=80'},
+    {title:'本周热门壁纸TOP10榜单',summary:'根据用户下载量和收藏数据，本周最受欢迎的10张壁纸排名出炉。',tag:'榜单',source:'数据中心',img:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=600&q=80'},
+    {title:'壁纸社区上线：分享你的桌面美学',summary:'全新社区功能上线，用户可以上传自制壁纸、参与话题讨论、关注喜欢的创作者。',tag:'功能',source:'产品动态',img:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80'},
+  ],
+};
+
+let currentView='gallery';
+let currentCat='全部';
+let currentFeed='综合';
+let currentCard=null;
+let pendingDownload=false;
+let catsOpen=false;
+
+// ── User ──
+function getUser(){return JSON.parse(localStorage.getItem('walls_user')||'null')}
+function setUser(u){localStorage.setItem('walls_user',JSON.stringify(u))}
+
+// ── Favorites ──
+function getFavorites(){
+  const u=getUser();if(!u)return[];
+  const all=JSON.parse(localStorage.getItem('walls_favs')||'{}');
+  return all[u.account]||[];
+}
+function toggleFavorite(id){
+  const u=getUser();if(!u){showToast('请先登录');openLogin();return null}
+  const all=JSON.parse(localStorage.getItem('walls_favs')||'{}');
+  if(!all[u.account])all[u.account]=[];
+  const idx=all[u.account].indexOf(id);
+  if(idx>=0){all[u.account].splice(idx,1)}else{all[u.account].push(id)}
+  localStorage.setItem('walls_favs',JSON.stringify(all));
+  return idx<0;
+}
+function isFav(id){return getFavorites().includes(id)}
+
+// ── Data ──
+function getWallpapers(){
+  const stored=localStorage.getItem('walls_data');
+  const custom=stored?JSON.parse(stored):[];
+  return[...DEMO_DATA,...custom].sort((a,b)=>new Date(b.date)-new Date(a.date));
+}
+function fmtDate(d){const dt=new Date(d);return dt.getFullYear()+'.'+String(dt.getMonth()+1).padStart(2,'0')+'.'+String(dt.getDate()).padStart(2,'0')}
+function fmtLikes(n){return n>=1000?(n/1000).toFixed(1)+'k':n}
+function getHighRes(url){return url.replace('w=700','w=1080').replace('q=85','q=92')}
+
+const HEART_OUTLINE='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg>';
+const HEART_FILLED='<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.9"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg>';
+const HEART_OUTLINE_W='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg>';
+const HEART_FILLED_W='<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg>';
+
+// ── View switching ──
+function switchView(view){
+  currentView=view;
+  document.getElementById('view-gallery').style.display=view==='gallery'?'':'none';
+  document.getElementById('view-feed').style.display=view==='feed'?'':'none';
+  document.getElementById('view-chat').style.display=view==='chat'?'':'none';
+  document.querySelectorAll('.nav-item,.nav-main').forEach(n=>n.classList.remove('active'));
+  const navMap={'gallery':'navGallery','feed':'navFeed','chat':'navChat'};
+  const navEl=document.getElementById(navMap[view]);
+  if(navEl)navEl.classList.add('active');
+  if(view==='feed')renderFeed();
+  if(view==='chat'){setTimeout(()=>{document.getElementById('chatMessages').scrollTop=document.getElementById('chatMessages').scrollHeight},100)}
+}
+
+// ── Gallery categories (toggleable) ──
+function initCategories(){
+  const c=document.getElementById('categories');
+  c.innerHTML='';
+  GALLERY_CATS.forEach(cat=>{
+    const chip=document.createElement('button');
+    chip.className='chip'+(cat===currentCat?' active':'');
+    chip.textContent=cat;
+    chip.onclick=()=>{
+      if(cat==='收藏'){if(!getUser()){showToast('请先登录');openLogin();return}}
+      document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+      chip.classList.add('active');
+      currentCat=cat;
+      renderGallery();
+    };
+    c.appendChild(chip);
+  });
+}
+function toggleCategories(){
+  catsOpen=!catsOpen;
+  document.getElementById('categories').classList.toggle('open',catsOpen);
+  if(!catsOpen){
+    currentCat='全部';
+    document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+    const first=document.querySelector('.chip');if(first)first.classList.add('active');
+    renderGallery();
+  }
+}
+
+// ── Render gallery ──
+function renderGallery(){
+  const gallery=document.getElementById('gallery');
+  gallery.innerHTML='';
+  const all=getWallpapers();
+  let filtered;
+  if(currentCat==='收藏'){
+    if(!getUser()){gallery.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg><p>登录后查看收藏</p></div>';return}
+    filtered=all.filter(w=>isFav(w.id));
+    document.getElementById('sectionTitle').textContent='我的收藏';
+    document.getElementById('sectionCount').textContent='FAVORITES '+filtered.length;
+  }else{
+    filtered=currentCat==='全部'?all:all.filter(w=>w.cat===currentCat);
+    document.getElementById('sectionTitle').textContent='今日灵感';
+    document.getElementById('sectionCount').textContent='DAILY PICKS '+filtered.length;
+  }
+  if(!filtered.length){gallery.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><p>'+(currentCat==='收藏'?'还没有收藏壁纸':'暂无壁纸')+'</p></div>';return}
+  const col1=document.createElement('div');col1.className='masonry-col';
+  const col2=document.createElement('div');col2.className='masonry-col';
+  filtered.forEach((w,i)=>{
+    const card=document.createElement('article');
+    card.className='card';
+    const liked=isFav(w.id);
+    card.innerHTML='<div class="cover '+(w.ratio||'ratio-short')+'"><img src="'+w.img+'" alt="'+w.title+'" loading="lazy"><button class="save'+(liked?' saved':'')+'">'+(liked?HEART_FILLED:HEART_OUTLINE)+'</button></div><div class="meta"><div class="title">'+w.title+'</div><div class="sub"><span>Planet Wallpaper</span><span>'+fmtLikes(w.likes)+'</span></div></div>';
+    card.querySelector('.save').addEventListener('click',function(e){
+      e.stopPropagation();
+      const r=toggleFavorite(w.id);
+      if(r===null)return;
+      this.classList.toggle('saved');
+      this.innerHTML=r?HEART_FILLED:HEART_OUTLINE;
+      showToast(r?'已加入收藏':'已取消收藏');
+      if(currentCat==='收藏'&&!r)setTimeout(renderGallery,300);
+    });
+    card.addEventListener('click',()=>openDetail(w));
+    (i%2===0?col1:col2).appendChild(card);
+  });
+  gallery.appendChild(col1);
+  gallery.appendChild(col2);
+}
+
+// ── Render feed ──
+let weiboCache=null,weiboLoading=false;
+function fetchWeiboHot(){
+  if(weiboCache)return Promise.resolve(weiboCache);
+  if(weiboLoading)return new Promise(r=>setTimeout(()=>r(weiboCache),1000));
+  weiboLoading=true;
+  return fetch('/proxy/weibo').then(r=>{
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.json();
+  }).then(d=>{
+    // 兼容微博移动端API格式
+    let items=[];
+    if(d&&d.data&&d.data.realtime){
+      items=d.data.realtime;
+    }else if(d&&d.data&&d.data.cards){
+      // 移动端API: data.cards[].card_group[]
+      d.data.cards.forEach(card=>{
+        if(card.card_group){
+          card.card_group.forEach(g=>{
+            if(g.desc)items.push({
+              note:g.desc,
+              label_name:g.category||'热',
+              num:g.desc_extr||0,
+              pic:g.pic||''
+            });
+          });
+        }
+      });
+    }
+    if(!items||!items.length){
+      // 备用：从card_group提取
+      if(d&&d.data&&d.data.cards){
+        d.data.cards.forEach(c=>{
+          if(c.card_group)c.card_group.forEach(g=>{
+            if(g.desc)items.push({note:g.desc,label_name:'热',num:g.desc_extr||0,pic:g.pic||''});
+          });
+        });
+      }
+    }
+    if(!items||!items.length)throw new Error('no data');
+    weiboLoading=false;
+    weiboCache=items.slice(0,50);
+    return weiboCache;
+  }).catch(e=>{
+    weiboLoading=false;
+    throw e;
+  });
+}
+
+function renderFeed(){
+  const list=document.getElementById('feedList');
+  list.innerHTML='';
+  if(currentFeed==='综合'){
+    list.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">加载微博热搜中…</div>';
+    fetchWeiboHot().then(items=>{
+      list.innerHTML='';
+      items.forEach((item,idx)=>{
+        const title=item.note||item.word||'';
+        const tag=item.label_name||('热');
+        const hot=item.num||0;
+        const rank=idx+1;
+        const img=item.pic||'';
+        const card=document.createElement('article');
+        card.className='feed-card';
+        const source=tag==='新闻'?'每日60秒':'微博热搜';
+        card.innerHTML=(img?'<img src="'+img+'" alt="'+title+'" onerror="this.style.display=\'none\'">':'')+
+          '<div class="feed-body">'+
+          '<h3><span style="color:'+(rank<=3?'var(--accent)':'var(--muted)')+';font-weight:700;margin-right:6px">'+rank+'</span>'+title+'</h3>'+
+          '<div class="feed-meta"><span class="feed-tag">'+tag+'</span>'+(hot?'<span>'+formatHot(hot)+' 热度</span>':'')+'<span>'+source+'</span></div>'+
+          '</div>';
+        card.addEventListener('click',()=>{
+          if(item.link){
+            window.open(item.link,'_blank');
+          }else{
+            window.open('https://s.weibo.com/weibo?q='+encodeURIComponent('#'+title+'#'),'_blank');
+          }
+        });
+        list.appendChild(card);
+      });
+    }).catch(e=>{
+      console.error('Weibo fetch failed:',e);
+      list.innerHTML='';
+      const fallback=FEED_DATA['综合'];
+      fallback.forEach(item=>{
+        const card=document.createElement('article');
+        card.className='feed-card';
+        card.innerHTML='<img src="'+item.img+'" alt="'+item.title+'"><div class="feed-body"><h3>'+item.title+'</h3><p>'+item.summary+'</p><div class="feed-meta"><span class="feed-tag">'+item.tag+'</span><span>'+item.source+'</span></div></div>';
+        card.addEventListener('click',()=>showToast('文章功能开发中'));
+        list.appendChild(card);
+      });
+      const tip=document.createElement('div');
+      tip.style.cssText='text-align:center;padding:12px;color:var(--muted);font-size:11px';
+      tip.textContent='微博热搜加载失败，已显示推荐内容';
+      list.appendChild(tip);
+    });
+    return;
+  }
+  const items=FEED_DATA[currentFeed]||[];
+  items.forEach(item=>{
+    const card=document.createElement('article');
+    card.className='feed-card';
+    card.innerHTML='<img src="'+item.img+'" alt="'+item.title+'"><div class="feed-body"><h3>'+item.title+'</h3><p>'+item.summary+'</p><div class="feed-meta"><span class="feed-tag">'+item.tag+'</span><span>'+item.source+'</span></div></div>';
+    card.addEventListener('click',()=>showToast('文章功能开发中'));
+    list.appendChild(card);
+  });
+}
+
+function formatHot(n){
+  if(n>=100000000)return(n/100000000).toFixed(1)+'亿';
+  if(n>=10000)return(n/10000).toFixed(1)+'万';
+  return n;
+}
+
+// ── Chat ──
+const chatMessages=document.getElementById('chatMessages');
+const chatInput=document.getElementById('chatInput');
+let chatStarted=false;
+
+function addBubble(text,sender){
+  const b=document.createElement('div');
+  b.className='chat-bubble '+sender;
+  b.innerHTML=text;
+  chatMessages.appendChild(b);
+  chatMessages.scrollTop=chatMessages.scrollHeight;
+  return b;
+}
+function addTyping(){
+  const b=document.createElement('div');
+  b.className='chat-bubble ai';
+  b.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
+  chatMessages.appendChild(b);
+  chatMessages.scrollTop=chatMessages.scrollHeight;
+  return b;
+}
+function aiRespond(msg){
+  const responses={
+    '推荐几款极简壁纸':'为你推荐几款极简风格壁纸：\n\n1. <b>白色空间</b> — 纯白背景配几何线条，极简美学\n2. <b>极简几何</b> — 黑白对比，干净利落\n3. <b>蓝紫渐变</b> — 柔和过渡，简约不简单\n\n你可以在图库的「极简」分类中找到更多。',
+    '怎么设置手机壁纸？':'设置手机壁纸的方法：\n\n<b>iPhone：</b>\n设置 → 墙纸 → 选取新墙纸\n\n<b>Android：</b>\n设置 → 显示 → 壁纸\n\n或直接在图库中点击壁纸，选择「下载无水印原图」后到相册设置即可。',
+    '给我讲个笑话':'一个程序员去面试，面试官问：\n"你有什么特长？"\n\n程序员说：\n"我会Ctrl+C和Ctrl+V。"\n\n面试官：\n"太好了，你被录用了，我们正好缺一个高级开发。"',
+    '今天的天气怎么样':'我暂时无法获取实时天气数据，建议你打开手机自带的天气App查看哦。\n\n不过我可以帮你推荐适合不同天气的壁纸：\n\n晴天 → 自然风景\n雨天 → 渐变系列\n阴天 → 极简留白\n夜晚 → Land专区',
+  };
+  let reply=responses[msg];
+  if(!reply){
+    if(msg.includes('壁纸')||msg.includes('推荐')){
+      reply='关于壁纸的问题，你可以去「图库」浏览各类风格，或者告诉我你喜欢的风格（自然、极简、插画、渐变等），我来帮你推荐！';
+    }else if(msg.includes('你好')||msg.includes('hello')||msg.includes('hi')){
+      reply='你好！我是小众星球的AI助手，有什么可以帮你的吗？你可以问我关于壁纸、设计、配色等方面的问题。';
+    }else if(msg.includes('谢谢')){
+      reply='不客气！如果还有其他问题随时问我～';
+    }else{
+      reply='这是一个很好的问题！虽然我目前还在学习中，但我会尽力帮助你。你可以尝试问我关于壁纸推荐、手机设置、配色知识等方面的问题。';
+    }
+  }
+  return reply;
+}
+// ── AI Chat (DeepSeek via 服务器代理) ──
+let chatHistory=[];
+let isWaiting=false;
+function closeApiSettings(){document.getElementById('apiSettingsOverlay')&&document.getElementById('apiSettingsOverlay').classList.remove('open')}
+function updateChatStatus(){
+  const s=document.getElementById('chatStatus');
+  const t=document.getElementById('chatStatusText');
+  s.classList.add('online');t.textContent='AI 已连接';
+}
+document.getElementById('chatSettingsBtn').onclick=function(){
+  showToast('AI 引擎：DeepSeek · 中文能力强');
+};
+
+// 统一调用: 服务器代理调用 DeepSeek API
+function callAI(messages){
+  const sys='你是「小众星球PLANET」的AI助手，用简洁友好的中文回答，可以聊壁纸、设计、配色、生活等话题。回复用纯文本，可用换行分段。';
+  const dsMessages=[{role:'system',content:sys}];
+  messages.forEach(m=>{
+    const text=m.parts?m.parts[0].text:m.content;
+    dsMessages.push({role:m.role==='model'?'assistant':'user',content:text});
+  });
+  return fetch('/proxy/ai',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({messages:dsMessages})
+  }).then(r=>{
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.text();
+  }).then(text=>{
+    if(!text||text.length<2||text.startsWith('AI_ERROR'))throw new Error(text||'empty');
+    return {text:text.trim(),engine:'DeepSeek'};
+  });
+}
+
+function sendChat(msg){
+  if(!msg.trim())return;
+  if(isWaiting){showToast('AI 正在回复中，请稍候…');return}
+  if(!chatStarted){chatMessages.innerHTML='';chatStarted=true;document.getElementById('chatSuggestions').style.display='none'}
+  addBubble(msg.replace(/</g,'&lt;'),'me');
+  chatInput.value='';
+  chatInput.style.height='auto';
+  const typing=addTyping();
+  isWaiting=true;
+  chatHistory.push({role:'user',parts:[{text:msg}]});
+  callAI(chatHistory).then(result=>{
+    typing.remove();
+    isWaiting=false;
+    chatHistory.push({role:'model',parts:[{text:result.text}]});
+    if(chatHistory.length>20)chatHistory=chatHistory.slice(-20);
+    addBubble(result.text.replace(/</g,'&lt;').replace(/\n/g,'<br>'),'ai');
+  }).catch(e=>{
+    typing.remove();
+    isWaiting=false;
+    console.error('All AI engines failed:',e);
+    console.error('All AI failed:',e);
+    addBubble('AI 连接超时，已切换到本地回复。<span style="font-size:11px;color:var(--muted);display:block;margin-top:4px">提示：请检查服务器是否已启动</span>','ai');
+    addBubble(aiRespond(msg).replace(/\n/g,'<br>'),'ai');
+  });
+}
+function sendQuick(msg){sendChat(msg)}
+document.getElementById('chatSend').onclick=()=>sendChat(chatInput.value);
+chatInput.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat(chatInput.value)}});
+chatInput.addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'});
+
+// ── Detail ──
+function openDetail(w){
+  currentCard=w;
+  document.getElementById('detailImg').src=getHighRes(w.img);
+  document.getElementById('detailTitle').textContent=w.title;
+  document.getElementById('detailTone').innerHTML='高清原图 · 适配全面屏<br>'+w.cat+' · '+fmtDate(w.date)+' · '+fmtLikes(w.likes)+' 人喜欢';
+  const heart=document.getElementById('sheetHeart');
+  const liked=isFav(w.id);
+  heart.style.background=liked?'rgba(141,31,48,.25)':'rgba(255,255,255,.72)';
+  heart.innerHTML=liked?HEART_FILLED_W:HEART_OUTLINE_W;
+  const lock=document.getElementById('sheetLock');
+  lock.textContent=getUser()?'已登录，点击即可下载无水印原图':'需登录后下载无水印原图';
+  document.getElementById('detail').classList.add('open');
+}
+document.getElementById('detailClose').onclick=function(){document.getElementById('detail').classList.remove('open')};
+document.getElementById('detail').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')});
+document.getElementById('sheetHeart').onclick=function(){
+  if(!currentCard)return;
+  const r=toggleFavorite(currentCard.id);
+  if(r===null)return;
+  this.style.background=r?'rgba(141,31,48,.25)':'rgba(255,255,255,.72)';
+  this.innerHTML=r?HEART_FILLED_W:HEART_OUTLINE_W;
+  showToast(r?'已加入收藏':'已取消收藏');
+  renderGallery();
+};
+document.getElementById('downloadBtn').onclick=function(){
+  if(!currentCard)return;
+  if(!getUser()){pendingDownload=true;openLogin();return}
+  const a=document.createElement('a');
+  a.href=getHighRes(currentCard.img);a.download=currentCard.title+'_无水印原图.jpg';a.target='_blank';a.click();
+  showToast('无水印原图下载中...');
+};
+document.getElementById('previewSaveBtn').onclick=function(){
+  if(!currentCard)return;
+  const img=document.getElementById('detailImg');
+  if(!img.complete||!img.naturalWidth){showToast('图片加载中，请稍候');return}
+  try{
+    const canvas=document.createElement('canvas');
+    canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
+    const ctx=canvas.getContext('2d');
+    ctx.drawImage(img,0,0);
+    ctx.font='bold '+Math.max(16,Math.floor(canvas.width/32))+'px Georgia,serif';
+    ctx.fillStyle='rgba(255,255,255,0.16)';ctx.textAlign='center';
+    const step=Math.max(180,canvas.width/4);
+    for(let y=-canvas.width;y<canvas.height+canvas.width;y+=step){
+      for(let x=-canvas.width;x<canvas.width+canvas.width;x+=step){
+        ctx.save();ctx.translate(x,y);ctx.rotate(-28*Math.PI/180);ctx.fillText('Planet Wallpaper',0,0);ctx.restore();
+      }
+    }
+    canvas.toBlob(function(blob){
+      if(!blob){showToast('保存失败，请重试');return}
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download=currentCard.title+'_预览.jpg';a.click();
+      URL.revokeObjectURL(url);showToast('带水印预览图已保存');
+    },'image/jpeg',0.92);
+  }catch(e){
+    const a=document.createElement('a');a.href=currentCard.img;a.download=currentCard.title+'_预览.jpg';a.target='_blank';a.click();
+    showToast('预览图已保存');
+  }
+};
+
+// ── Search ──
+const searchPanel=document.getElementById('searchPanel');
+const searchInput=document.getElementById('searchInput');
+const searchResults=document.getElementById('searchResults');
+document.getElementById('searchBtn').onclick=function(){searchPanel.classList.add('open');setTimeout(function(){searchInput.focus()},300)};
+document.getElementById('searchClose').onclick=function(){searchPanel.classList.remove('open');searchInput.value='';searchResults.innerHTML=''};
+function doSearch(){
+  const q=searchInput.value.trim();
+  if(!q){searchResults.innerHTML='';return}
+  const all=getWallpapers();
+  const matched=all.filter(w=>w.title.toLowerCase().includes(q.toLowerCase()));
+  if(!matched.length){searchResults.innerHTML='<div class="search-empty">没有找到「'+q+'」相关的壁纸</div>';return}
+  searchResults.innerHTML='<h3>搜索结果 · '+matched.length+'</h3>';
+  const col1=document.createElement('div');col1.className='masonry';
+  const c1=document.createElement('div');c1.className='masonry-col';
+  const c2=document.createElement('div');c2.className='masonry-col';
+  matched.forEach((w,i)=>{
+    const card=document.createElement('article');
+    card.className='card';
+    const liked=isFav(w.id);
+    card.innerHTML='<div class="cover '+(w.ratio||'ratio-short')+'"><img src="'+w.img+'" alt="'+w.title+'" loading="lazy"><button class="save'+(liked?' saved':'')+'">'+(liked?HEART_FILLED:HEART_OUTLINE)+'</button></div><div class="meta"><div class="title">'+w.title+'</div><div class="sub"><span>Planet Wallpaper</span><span>'+fmtLikes(w.likes)+'</span></div></div>';
+    card.querySelector('.save').addEventListener('click',function(e){
+      e.stopPropagation();
+      const r=toggleFavorite(w.id);
+      if(r===null)return;
+      this.classList.toggle('saved');
+      this.innerHTML=r?HEART_FILLED:HEART_OUTLINE;
+      showToast(r?'已加入收藏':'已取消收藏');
+    });
+    card.addEventListener('click',()=>openDetail(w));
+    (i%2===0?c1:c2).appendChild(card);
+  });
+  col1.appendChild(c1);col1.appendChild(c2);
+  searchResults.appendChild(col1);
+}
+document.getElementById('searchGo').onclick=doSearch;
+searchInput.addEventListener('keydown',function(e){if(e.key==='Enter')doSearch()});
+
+// ── Theme ──
+const themeIcon=document.getElementById('themeIcon');
+const MOON_SVG='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+const SUN_SVG='<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  document.querySelector('meta[name="theme-color"]').setAttribute('content',t==='dark'?'#0d0d0f':'#f5f3ee');
+  themeIcon.innerHTML=t==='dark'?SUN_SVG:MOON_SVG;
+}
+(function initTheme(){applyTheme(localStorage.getItem('walls_theme')||'light')})();
+document.getElementById('themeBtn').onclick=function(){
+  const cur=document.documentElement.getAttribute('data-theme')||'light';
+  const next=cur==='dark'?'light':'dark';
+  applyTheme(next);localStorage.setItem('walls_theme',next);
+};
+
+// ── Bottom nav ──
+document.getElementById('navGallery').onclick=function(){
+  if(currentView==='gallery'){toggleCategories()}else{switchView('gallery')}
+};
+document.getElementById('navFeed').onclick=function(){switchView('feed')};
+document.getElementById('navChat').onclick=function(){switchView('chat')};
+
+// ── Feed tabs ──
+document.querySelectorAll('.feed-tab').forEach(tab=>{
+  tab.onclick=function(){
+    document.querySelectorAll('.feed-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentFeed=tab.dataset.feed;
+    renderFeed();
+  };
+});
+
+// ── Login ──
+function openLogin(){document.getElementById('loginOverlay').classList.add('open')}
+function closeLogin(){document.getElementById('loginOverlay').classList.remove('open')}
+function switchLoginMode(mode,el){
+  document.querySelectorAll('.login-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  if(mode==='login'){
+    document.getElementById('loginFields').style.display='block';
+    document.getElementById('registerFields').style.display='none';
+    document.getElementById('loginSub').textContent='登录后下载无水印原图、收藏壁纸';
+    document.getElementById('loginSwitch').innerHTML='还没有账号？<a onclick="switchLoginMode(\'register\',document.querySelectorAll(\'.login-tab\')[1])">立即注册</a>';
+  }else{
+    document.getElementById('loginFields').style.display='none';
+    document.getElementById('registerFields').style.display='block';
+    document.getElementById('loginSub').textContent='创建账号，开启壁纸之旅';
+    document.getElementById('loginSwitch').innerHTML='已有账号？<a onclick="switchLoginMode(\'login\',document.querySelectorAll(\'.login-tab\')[0])">去登录</a>';
+  }
+}
+function doLogin(){
+  const a=document.getElementById('loginAccount').value.trim();
+  const p=document.getElementById('loginPassword').value.trim();
+  if(!a||!p){showToast('请填写完整');return}
+  const users=JSON.parse(localStorage.getItem('walls_users')||'{}');
+  if(users[a]&&users[a].password===p){
+    setUser({account:a,name:users[a].name});
+    closeLogin();showToast('登录成功');
+    if(pendingDownload){pendingDownload=false;document.getElementById('downloadBtn').click()}
+    renderGallery();
+  }else{showToast('账号或密码错误')}
+}
+function doRegister(){
+  const n=document.getElementById('regName').value.trim();
+  const a=document.getElementById('regAccount').value.trim();
+  const p=document.getElementById('regPassword').value.trim();
+  if(!n||!a||!p){showToast('请填写完整');return}
+  if(p.length<6){showToast('密码至少6位');return}
+  const users=JSON.parse(localStorage.getItem('walls_users')||'{}');
+  if(users[a]){showToast('该账号已注册');return}
+  users[a]={name:n,password:p};
+  localStorage.setItem('walls_users',JSON.stringify(users));
+  setUser({account:a,name:n});
+  closeLogin();showToast('注册成功，已自动登录');
+  if(pendingDownload){pendingDownload=false;document.getElementById('downloadBtn').click()}
+  renderGallery();
+}
+
+// ── Toast ──
+function showToast(t){
+  const el=document.getElementById('toast');
+  el.textContent=t;el.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(()=>el.classList.remove('show'),1700);
+}
+
+// ── Init ──
+initCategories();
+renderGallery();
+updateChatStatus();
+addBubble('你好！我是小众星球的AI助手 <br>有什么想问的，尽管开口～','ai');
+(function initBanner(){
+  var b=JSON.parse(localStorage.getItem('walls_banner')||'null');
+  if(!b)return;
+  if(b.kicker)document.getElementById('heroKicker').textContent=b.kicker;
+  if(b.title)document.getElementById('heroTitle').textContent=b.title;
+  if(b.desc)document.getElementById('heroDesc').textContent=b.desc;
+  if(b.img){
+    var h=document.getElementById('hero');
+    h.style.background='url('+b.img+') center/cover';
+    h.classList.add('hero-img');
+  }
+})();
+</script>
+</body>
+</html>
