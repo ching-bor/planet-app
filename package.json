@@ -1,0 +1,15 @@
+{
+  "name": "planet-app",
+  "version": "1.0.0",
+  "description": "小众星球 PLANET - 壁纸图库 / 刷一刷 / AI助手",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "ching-bor",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}

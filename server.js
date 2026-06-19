@@ -4,8 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 
-const PORT = 8765;
-const { DEEPSEEK_KEY } = require('./config');
+const PORT = process.env.PORT || 8765;
+const DEEPSEEK_KEY = process.env.DEEPSEEK_API_KEY || require('./config').DEEPSEEK_KEY;
 
 const MIME = {
   '.html': 'text/html;charset=utf-8',
